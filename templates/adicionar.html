@@ -1,0 +1,8 @@
+<form method="post">
+    <input type="text" name="codigo" placeholder="Código" value="{{ produto.codigo if produto else '' }}"><br>
+    <input type="text" name="descricao" placeholder="Descrição" value="{{ produto.descricao if produto else '' }}"><br>
+    <input type="number" name="quantidade" placeholder="Quantidade" value="{{ produto.quantidade if produto else '' }}"><br>
+    <input type="text" name="localizacao" placeholder="Localização" value="{{ produto.localizacao if produto else '' }}"><br>
+    <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">Cancelar</a>
+</form>

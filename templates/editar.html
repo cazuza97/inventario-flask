@@ -1,0 +1,35 @@
+<h2>Editar Produto</h2>
+
+<form method="post">
+    <input type="text" name="codigo" placeholder="Código" value="{{ produto.codigo if produto else '' }}"><br>
+    <input type="text" name="descricao" placeholder="Descrição" value="{{ produto.descricao if produto else '' }}"><br>
+    <input type="number" name="quantidade" placeholder="Quantidade" value="{{ produto.quantidade if produto else '' }}"><br>
+    <input type="text" name="localizacao" placeholder="Localização" value="{{ produto.localizacao if produto else '' }}"><br>
+    <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">Cancelar</a>
+</form>
+
+<!-- Lista de documentos -->
+<h5>Documentos:</h5>
+<ul>
+    {% for doc in documentos %}
+        <li>
+            <a href="{{ url_for('uploaded_file', filename=doc.caminho_arquivo) }}" target="_blank">
+                {{ doc.nome_arquivo }}
+            </a>
+            <!-- Botão de excluir -->
+            <a href="{{ url_for('excluir_documento', id=doc.id) }}" 
+               onclick="return confirm('Tem certeza que deseja excluir este arquivo?')">
+               [Excluir]
+            </a>
+        </li>
+    {% else %}
+        <li>Nenhum documento enviado.</li>
+    {% endfor %}
+</ul>
+
+<!-- Botão para enviar novo documento -->
+<form action="{{ url_for('upload', produto_id=produto.id) }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="arquivo" required>
+    <button type="submit">Enviar Documento</button>
+</form>
