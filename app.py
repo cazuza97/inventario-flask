@@ -80,10 +80,10 @@ def index():
 @app.route("/adicionar", methods=["GET", "POST"])
 def adicionar():
     if request.method == "POST":
-        codigo = request.form["codigo"]
-        descricao = request.form["descricao"]
+        codigo = request.form["codigo"].upper()
+        descricao = request.form["descricao"].upper()
         quantidade = request.form["quantidade"]
-        localizacao = request.form["localizacao"]
+        localizacao = request.form["localizacao"].upper()
         if codigo and descricao and quantidade.isdigit():
             conn = get_conn()
             cursor = conn.cursor()
@@ -106,10 +106,10 @@ def editar(id):
     documentos = cursor.fetchall()
 
     if request.method == "POST":
-        codigo = request.form["codigo"]
-        descricao = request.form["descricao"]
+        codigo = request.form["codigo"].upper()
+        descricao = request.form["descricao"].upper()
         quantidade = request.form["quantidade"]
-        localizacao = request.form["localizacao"]
+        localizacao = request.form["localizacao"].upper()
         if codigo and descricao and quantidade.isdigit():
             cursor.execute("UPDATE produtos SET codigo=?, descricao=?, quantidade=?, localizacao=? WHERE id=?",
                            (codigo, descricao, int(quantidade), localizacao, id))
