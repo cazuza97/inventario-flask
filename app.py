@@ -1,16 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 import os
 from werkzeug.utils import secure_filename
+from functools import wraps
+
+
 
 # ----------------------------
 # Configuração do Flask
 # ----------------------------
 app = Flask(__name__)
+app.secret_key = "inventario"  # Troque para algo seguro
 DB_PATH = "inventario.db"
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+
+USUARIO = "admin"
+SENHA = "1234"
 
 # ----------------------------
 # Criar tabelas se não existirem
@@ -57,9 +66,37 @@ def get_conn():
 # ----------------------------
 # ROTAS
 # ----------------------------
+# Middleware para proteger rotas
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("logado"):  # verifica se o usuário está logado
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        usuario = request.form["usuario"]
+        senha = request.form["senha"]
+        if usuario == USUARIO and senha == SENHA:
+            session["logado"] = True
+            return redirect(url_for("index"))
+        else:
+            return "Usuário ou senha inválidos!"
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
 
 # Página inicial / listagem
 @app.route("/", methods=["GET"])
+@login_required
 def index():
     filtro = request.args.get("filtro", "")
     conn = get_conn()
@@ -78,6 +115,7 @@ def index():
 
 # Adicionar produto
 @app.route("/adicionar", methods=["GET", "POST"])
+@login_required
 def adicionar():
     if request.method == "POST":
         codigo = request.form["codigo"].upper()
@@ -96,6 +134,7 @@ def adicionar():
 
 # Editar produto
 @app.route("/editar/<int:id>", methods=["GET", "POST"])
+@login_required
 def editar(id):
     conn = get_conn()
     cursor = conn.cursor()
@@ -121,6 +160,7 @@ def editar(id):
 
 # Excluir produto
 @app.route("/excluir/<int:id>")
+@login_required
 def excluir(id):
     conn = get_conn()
     cursor = conn.cursor()
@@ -131,6 +171,7 @@ def excluir(id):
 
 # Upload de documentos
 @app.route("/upload/<int:produto_id>", methods=["GET", "POST"])
+@login_required
 def upload(produto_id):
     if request.method == "POST":
         arquivo = request.files.get("arquivo")
@@ -153,6 +194,7 @@ def upload(produto_id):
 
 #excluir arquivo
 @app.route("/excluir_documento/<int:id>")
+@login_required
 def excluir_documento(id):
     conn = get_conn()
     cursor = conn.cursor()
